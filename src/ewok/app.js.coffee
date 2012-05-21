@@ -8,7 +8,7 @@ class App
   # Route Helper
   @use_view: (ViewClass)->
     enter: (args...)->
-      @app.log "Routed ##{ @path }", @params
+      # @app.log "Routed ##{ @path }", @params
       @app.showView ViewClass, { @params }
     leave: (args...)->
       # Ewok.log "Leave #{ @path }!", @
@@ -43,7 +43,7 @@ class App
     @router= new Backbone.Router()
     for own path,info of @routeMap
       rInfo= new RouteInfo(@, path, info)
-      @log "Route -> ##{path}", rInfo
+      # @log "Route -> ##{path}", rInfo
       @router.route path, null, @_routeChange(rInfo)
       @routeMap[path]= rInfo # ???
     @
@@ -83,8 +83,10 @@ class App
       view
     view.render()
     @activeView.close() if @activeView
+    
     @el.html ""
     @el.append view.el
+
     @activeView= view
     view.show()
     @

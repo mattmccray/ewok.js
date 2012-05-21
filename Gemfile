@@ -5,7 +5,7 @@ gem "sinatra"
 gem "active_support"
 
 gem "rake"
-gem "gumdrop", :path=>"~/Projects/OpenSource/gumdrop"
+gem "gumdrop" #, :path=>"~/Projects/OpenSource/gumdrop"
 
 # Add your dependencies here:
 
