@@ -36,3 +36,5 @@ Assuming you've included `ewok.js` in your page, you might use it like this (in 
 ## Building
 
 Ewok is built with [Gumdrop](https://github.com/darthapo/gumdrop).
+
+In theory, just run `bundle install`, then `rake build` it. More/better instructions soon.
