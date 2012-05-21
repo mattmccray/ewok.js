@@ -1,0 +1,122 @@
+doctype html
+html lang="en" 
+  head
+    meta charset="utf-8" 
+    title Ewok Sanbox
+    script src==uri('ewok-debug.js')
+    sass:
+      aside
+        float: left
+        width: 150px
+      #main_section
+        margin-left: 200px
+      .ewok-view
+        outline: 1px solid pink
+    javascript:
+      if(!Ewok) {
+        alert("ewok is not built, or is in an error state!")
+        throw "ewok is not built, or is in an error state!"
+      }
+
+  body
+    header
+      h1 Ewok Sandbox
+      h4 Yub Nub!
+    article
+      aside
+        nav
+          ul
+            li
+              a href="#" Home
+            li
+              a href="#hello/you" Say Hello
+            li
+              a href="#search" Search
+      section#main_section
+coffee:
+  ## VIEWS
+  class HomeView extends Ewok.View
+    templates:
+      main: """
+              <div>
+                <h2> Home </h2>
+                <div class="posts">
+                </div>
+                <ul>
+                {{#posts}}
+                  <li>{{title}}</li>
+                {{/posts}}
+                </ul>
+              </div>
+            """
+    render: ->
+      @$el.html @templates.main.render(posts:@app.posts.toJSON())
+      @app.posts.each (post)=>
+        @addView PostView, model:post
+
+  class PostView extends Ewok.View
+    templates:
+      main: """
+              <dl>
+                <dt>{{ title }}</dt>
+                <dd>{{ body }}</dd>
+              </dl>
+            """
+    render: ->
+      @$el.html @templates.main.render(@model.toJSON())
+      @parent.$el.find('.posts').append @$el
+
+  class HelloView extends Ewok.View
+    templates:
+      main: """
+              <div>
+                <h2> Hello {{ name }} </h2>
+              </div>
+            """
+
+  class SearchView extends Ewok.View
+    events:
+      'submit form': 'doSubmit'
+    templates:
+      main: """
+              <form>
+                <input type="search" id="q" value="{{q}}"/>
+                <button>Go</button>
+              </form>
+              {{#q}}
+              <div>
+                <h2> Searching For "{{ q }}" </h2>
+              </div>
+              {{/q}}
+            """
+    doSubmit: (e)->
+      e.preventDefault()
+      @log "DO SUBMIT!", @
+      @app.visit "search/#{ @$el.find("#q").val() }"
+
+  ## MODELS
+  class Post extends Ewok.Model
+
+  class PostCollection extends Ewok.Collection
+    model: Post
+
+  ## APP (and routes)
+  class @TestApp extends Ewok.App
+    
+    @route '', @use_view(HomeView)
+
+    @route 'hello/:name', @use_view(HelloView)
+
+    @route 'search', @use_view(SearchView)
+    @route 'search/:q', @use_view(SearchView)
+
+    initialize: ->
+      @posts= new PostCollection()
+      data= []
+      data.push title:"Post 1", body:"I've got stuff to say!"
+      data.push title:"Post 2", body:"I always have stuff to say!"
+      data.push title:"Important Post", body:"POOOT"
+      @posts.reset data
+
+
+  TestApp.run el:'#main_section'
