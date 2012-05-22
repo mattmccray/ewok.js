@@ -36,34 +36,39 @@ html lang="en"
 coffee:
   ## VIEWS
   class HomeView extends Ewok.View
-    templates:
+    template_src:
       main: """
-              <div>
-                <h2> Home </h2>
-                <div class="posts">
-                </div>
-                <ul>
-                {{#posts}}
-                  <li>{{title}}</li>
-                {{/posts}}
-                </ul>
-              </div>
+              (div
+                (h2  "Home")
+                (div.posts.cats)
+                (ul)
+                  (each (posts)
+                    (li title)))
+
             """
     render: ->
-      @$el.html @templates.main.render(posts:@app.posts.toJSON())
+      #@$el.html @templates.main.render(posts:@app.posts.toJSON())
+      content= Ewok.sexp(@template_src.main)(posts:@app.posts.toJSON())
+      @log "Rendered:", content
+      @$el.html content
       @app.posts.each (post)=>
         @addView PostView, model:post
 
   class PostView extends Ewok.View
-    templates:
+    template_src:
       main: """
-              <dl>
-                <dt>{{ title }}</dt>
-                <dd>{{ body }}</dd>
-              </dl>
+              (dl
+                (dt title)
+                (dd body)
+                (hr))
             """
     render: ->
-      @$el.html @templates.main.render(@model.toJSON())
+      tmpl= Ewok.sexp(@template_src.main)
+      data= @model.toJSON()
+      # content= @templates.main.render(data)
+      content= tmpl(data)
+      @log "Rendered:", content
+      @$el.html content
       @parent.$el.find('.posts').append @$el
 
   class HelloView extends Ewok.View
