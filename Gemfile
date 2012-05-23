@@ -17,7 +17,7 @@ gem "sass"
 gem "coffee-script"
 
 # For JavaScript stitching and compressing:
-#gem 'uglifier'
+gem 'uglifier'
 #gem 'yui-compressor'
 gem 'jsmin'
 gem 'stitch-rb'
