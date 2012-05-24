@@ -35,7 +35,7 @@ getTemplateContent= (path)->
 
 @Ewok=
 
-  VERSION: "0.1.1"
+  VERSION: "0.2"
 
   exports: (methods)->
     _.extend @, methods
@@ -54,14 +54,17 @@ getTemplateContent= (path)->
   #   kite.formatters[name]= fn for own name,fn of hash
   #   @
 
-  fetchTemplate: ((has_hogan)->
-    if has_hogan
+  fetchTemplate: ((has_settee, has_hogan)->
+    if has_settee
+      (idOrTmpl)->
+        Settee getTemplateContent(idOrTmpl)
+    else if has_hogan
       (idOrTmpl)-> 
         Hogan.compile getTemplateContent(idOrTmpl)
     else
       (idOrTmpl)-> 
         _.template getTemplateContent(idOrTmpl)
-  )(Hogan?)
+  )(Settee?, Hogan?)
 
 Ewok.loggable Ewok
 Ewok.eventable Ewok

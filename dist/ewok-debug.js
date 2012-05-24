@@ -11899,6 +11899,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   };
 
 }).call(this);
+
 /*
 Settee.js v0.1
 
@@ -12228,7 +12229,7 @@ Returns a settee #object:
       attrs = "";
       tag = expr[0];
       if ((parts = tag.split('.')).length > 1) {
-        tag = parts.shift();
+        tag = parts.shift() || "div";
         attrs += " class=\"" + (parts.join(' ')) + "\"";
       }
       _ref = expr.slice(1);
@@ -12448,6 +12449,8 @@ Returns a settee #object:
 
   Settee.fnx.cdr = Settee.fnx.rest;
 
+  Settee.fnx["?"] = Settee.fnx.and;
+
   get_env = function(expr, env) {
     var obj, part, parts, _j, _len1;
     if (typeof expr !== "string") {
@@ -12509,7 +12512,7 @@ Returns a settee #object:
   };
 
   _evaluate = function(expr, env) {
-    var cases, data, ev, ez, ge, newenv, parts, res, rule, source, v, variable, _j, _k, _len1, _len2, _ref1;
+    var cases, data, ev, ez, ge, key, newenv, parts, res, rule, source, v, variable, _j, _k, _len1, _len2, _ref1;
     ez = expr[0];
     if (!isNaN(expr)) {
       return Number(expr);
@@ -12520,6 +12523,10 @@ Returns a settee #object:
     if (ez === '"') {
       v = expr.slice(1);
       return v.replace(/[\\]"/g, '"');
+    }
+    if (ez === ':') {
+      key = expr.slice(1);
+      return get_env(key, env);
     }
     if (ez === "list") {
       return _.map(expr.slice(1), function(x) {
@@ -12549,7 +12556,7 @@ Returns a settee #object:
         return _evaluate(expr[2], env);
       }
       if (expr.length <= 3) {
-        return null;
+        return "";
       }
       _.each(expr.slice(2, expr[expr.length - 2]), function(x, i) {
         return _evaluate(x, env);
@@ -12677,7 +12684,7 @@ Returns a settee #object:
   };
 
   this.Ewok = {
-    VERSION: "0.1.1",
+    VERSION: "0.2",
     exports: function(methods) {
       _.extend(this, methods);
       return this;
@@ -12694,8 +12701,12 @@ Returns a settee #object:
       _.extend(obj, logger(prefix));
       return this;
     },
-    fetchTemplate: (function(has_hogan) {
-      if (has_hogan) {
+    fetchTemplate: (function(has_settee, has_hogan) {
+      if (has_settee) {
+        return function(idOrTmpl) {
+          return Settee(getTemplateContent(idOrTmpl));
+        };
+      } else if (has_hogan) {
         return function(idOrTmpl) {
           return Hogan.compile(getTemplateContent(idOrTmpl));
         };
@@ -12704,7 +12715,7 @@ Returns a settee #object:
           return _.template(getTemplateContent(idOrTmpl));
         };
       }
-    })(typeof Hogan !== "undefined" && Hogan !== null)
+    })(typeof Settee !== "undefined" && Settee !== null, typeof Hogan !== "undefined" && Hogan !== null)
   };
 
   Ewok.loggable(Ewok);
@@ -13063,7 +13074,7 @@ Returns a settee #object:
         data = this.model != null ? this.model.toJSON ? this.model.toJSON() : this.model : this.params ? this.params : this.collection ? {
           items: this.collection.toJSON()
         } : {};
-        return this.$el.html(this.templates.main.render(data));
+        return this.$el.html(this.templates.main(data));
       }
     };
 

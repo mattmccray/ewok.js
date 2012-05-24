@@ -17,9 +17,10 @@ gem "sass"
 gem "coffee-script"
 
 # For JavaScript stitching and compressing:
-gem 'uglifier'
+gem 'packr'
+#gem 'uglifier'
 #gem 'yui-compressor'
-gem 'jsmin'
+#gem 'jsmin'
 gem 'stitch-rb'
 gem 'sprockets'
 

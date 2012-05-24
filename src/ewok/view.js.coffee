@@ -78,7 +78,7 @@ class View extends Backbone.View
         items:@collection.toJSON()
       else
         {}
-      @$el.html @templates.main.render(data)
+      @$el.html @templates.main(data)
 
   fetchTemplate: (path)->
     # @log "fetchTemplate", path, @

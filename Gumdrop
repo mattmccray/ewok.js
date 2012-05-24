@@ -21,11 +21,11 @@ ignore 'index.html'
 
 generate do
 
-  sprockets 'ewok.js', :src=>'ewok.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>:jsmin
+  sprockets 'ewok.js', :src=>'ewok.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>:packr
 
   sprockets 'ewok-debug.js', :src=>'ewok-debug.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>false
 
-  sprockets 'ewok-only.js', :src=>'ewok-only.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>:jsmin
+  sprockets 'ewok-only.js', :src=>'ewok-only.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>:packr
   
   # For running test in serve mode
   sprockets 'dist/ewok-debug.js', :src=>'ewok-debug.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>false

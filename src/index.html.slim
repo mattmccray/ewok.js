@@ -48,7 +48,7 @@ coffee:
             """
     render: ->
       #@$el.html @templates.main.render(posts:@app.posts.toJSON())
-      content= Ewok.sexp(@template_src.main)(posts:@app.posts.toJSON())
+      content= Settee(@template_src.main)(posts:@app.posts.toJSON())
       @log "Rendered:", content
       @$el.html content
       @app.posts.each (post)=>
@@ -63,7 +63,7 @@ coffee:
                 (hr))
             """
     render: ->
-      tmpl= Ewok.sexp(@template_src.main)
+      tmpl= Settee(@template_src.main)
       data= @model.toJSON()
       # content= @templates.main.render(data)
       content= tmpl(data)
@@ -74,9 +74,8 @@ coffee:
   class HelloView extends Ewok.View
     templates:
       main: """
-              <div>
-                <h2> Hello {{ name }} </h2>
-              </div>
+              (div
+                (h2 "Helloo " name))
             """
 
   class SearchView extends Ewok.View
@@ -84,16 +83,21 @@ coffee:
       'submit form': 'doSubmit'
     templates:
       main: """
-              <form>
-                <input type="search" id="q" value="{{q}}"/>
-                <button>Go</button>
-              </form>
-              {{#q}}
-              <div>
-                <h2> Searching For "{{ q }}" </h2>
-              </div>
-              {{/q}}
+              (+
+                (form
+                  (input type=search id=q (@ value :q)
+                  (button "Go"))
+                (if :q
+                  (div
+                    (h2 "Searching For " :q)
+                  )
+                )
             """
+    render: ->
+      @params.q= "" unless @params.q
+      super()
+      @log @$el.html()
+
     doSubmit: (e)->
       e.preventDefault()
       @log "DO SUBMIT!", @
@@ -125,3 +129,15 @@ coffee:
 
 
   TestApp.run el:'#main_section'
+
+  ###
+                  <form>
+                <input type="search" id="q" value="{{q}}"/>
+                <button>Go</button>
+              </form>
+              {{#q}}
+              <div>
+                <h2> Searching For "{{ q }}" </h2>
+              </div>
+              {{/q}}
+  ###
