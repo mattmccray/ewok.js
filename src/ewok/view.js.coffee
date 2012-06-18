@@ -1,11 +1,6 @@
 
 class View extends Backbone.View
 
-  # templates: {}
-
-  # _attached: []
-  # _views: []
-
   constructor: (options)->
     @templates[name]= @fetchTemplate(path) for own name,path of @templates if @templates
     super options
@@ -27,12 +22,13 @@ class View extends Backbone.View
   attach: (target, events) ->
     @_attached or= []
     for own event,callback of events
-      target.on event, callback
+      callback = @[callback] unless _.isFunction(callback)
+      target.on event, callback, @ # Always set context to this??
       @_attached.push {target,event,callback}
     @
   
   detach: ->
-    item.target.off(item.event, item.callback) for item in @_attached if @_attached
+    item.target.off(item.event, item.callback, this) for item in @_attached if @_attached
     @_attached=[]
     @
 
@@ -47,18 +43,24 @@ class View extends Backbone.View
   close: ->
     @unbind()
     @detach()
-    view.close() for view in @_views if @_views
+    @closeChildViews()
     @$el.data('view', null)
     @remove()
     @onClose() if @onClose
     # @log "CLOSED"
     @
 
+  closeChildViews: ->
+    view.close() for view in @_views if @_views
+    @
+
+
   # Doesn't call the Ewok.loggable code until it's first used.
-  log: (args...)->
-    logPrefix= if @.constructor.name then "[#{@.constructor.name}]" else '[View]'
-    Ewok.loggable( @, logPrefix)
-    @['log'].apply(@, args)
+  # log: (args...)->
+  #   logPrefix= if @.constructor.name then "[#{@.constructor.name}]" else '[View]'
+  #   Ewok.loggable( @, logPrefix)
+  #   @['log'].apply(@, args)
+  #   @
   
   show: ->
     @onShow() if @onShow
@@ -75,10 +77,11 @@ class View extends Backbone.View
       else if @params
         @params
       else if @collection
-        items:@collection.toJSON()
+        @collection.toJSON()
       else
         {}
       @$el.html @templates.main(data)
+    @
 
   fetchTemplate: (path)->
     # @log "fetchTemplate", path, @
@@ -86,11 +89,13 @@ class View extends Backbone.View
       Ewok.fetchTemplate path
     else
       # If it's not a string, it's probably already compiled!
-      path
+      blam.compile path
       
 
 
-Ewok.exports { View }
+Ewok
+  .deferLoggable( View:: )
+  .exports { View }
 
 
 $.fn.view= ->

@@ -5,3 +5,4 @@
 //= require ewok/view.js
 //= require ewok/model.js
 //= require ewok/collection.js
+// = require ewok/form-model.js

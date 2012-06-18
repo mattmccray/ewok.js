@@ -10,6 +10,8 @@ configure do
   set :output_dir, "./dist"
   set :source_dir, "./src"
 
+  set :server_timeout, 3 # seconds...
+
 end
 
 #  Skip files from build process... Like they don't exist.

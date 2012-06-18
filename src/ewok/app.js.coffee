@@ -32,8 +32,8 @@ class App
 
   constructor: ->
     @el or= 'body'
-    logPrefix= if @.constructor.name then "[#{@.constructor.name}]" else '[App]'
-    Ewok.loggable( @, logPrefix)
+    # logPrefix= if @.constructor.name then "[#{@.constructor.name}]" else '[App]'
+    # Ewok.loggable( @, logPrefix)
     @stateMap= @.constructor.stateMap or {}
     @routeMap= @.constructor.routeMap or {}
     @_buildRouter()
@@ -83,13 +83,16 @@ class App
       view
     view.render()
     @activeView.close() if @activeView
-    
-    @el.html ""
-    @el.append view.el
 
+    @doViewChange(view)
+    
     @activeView= view
     view.show()
     @
+
+  doViewChange: (view)->
+    @el.html ""
+    @el.append view.el
 
   run: (@options={})->
     @el= @options.el if @options.el
@@ -131,5 +134,6 @@ class RouteInfo
 
 
 Ewok
+  .deferLoggable( App::, '[App]')
   .eventable( App:: )
   .exports({ App })

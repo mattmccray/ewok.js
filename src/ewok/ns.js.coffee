@@ -1,6 +1,5 @@
 ###
-  EWOK
-    Elucidata Webapp 
+  Ewok v0.4
 ###
 
 has_console= if window.console and console.log then yes else no
@@ -31,11 +30,14 @@ logger= (prefix)->
   con
 
 getTemplateContent= (path)->
-  if path.charAt(0) is "#" then $(path).text() else path
+  if _.isString(path)
+    if path.charAt(0) is "#" then $(path).text() else path
+  else if _.isFunction(path)
+    path
 
 @Ewok=
 
-  VERSION: "0.2"
+  VERSION: "0.4"
 
   exports: (methods)->
     _.extend @, methods
@@ -49,22 +51,26 @@ getTemplateContent= (path)->
   loggable: (obj, prefix="")->
     _.extend obj, logger(prefix)
     @
+  
+  deferLoggable: (obj, prefix="")->
+    _.extend obj, log: (args...)->
+      logPrefix= if @.constructor.name then "[#{@.constructor.name}]" else prefix
+      Ewok.loggable( @, logPrefix)
+      @['log'].apply(@, args)
+    @
 
-  # addFormatters: (hash)->
-  #   kite.formatters[name]= fn for own name,fn of hash
-  #   @
 
-  fetchTemplate: ((has_settee, has_hogan)->
-    if has_settee
+  fetchTemplate: ((has_blam, has_hogan)->
+    if has_blam
       (idOrTmpl)->
-        Settee getTemplateContent(idOrTmpl)
+        blam.compile getTemplateContent(idOrTmpl)
     else if has_hogan
       (idOrTmpl)-> 
         Hogan.compile getTemplateContent(idOrTmpl)
     else
       (idOrTmpl)-> 
         _.template getTemplateContent(idOrTmpl)
-  )(Settee?, Hogan?)
+  )(blam?, Hogan?)
 
 Ewok.loggable Ewok
 Ewok.eventable Ewok

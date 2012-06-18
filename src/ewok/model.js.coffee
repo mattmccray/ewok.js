@@ -2,4 +2,6 @@
 class Model extends Backbone.Model
 
 
-Ewok.exports { Model }
+Ewok
+  .deferLoggable( Model:: )
+  .exports { Model }

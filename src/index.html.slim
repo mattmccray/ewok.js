@@ -34,69 +34,65 @@ html lang="en"
               a href="#search" Search
       section#main_section
 coffee:
+
   ## VIEWS
   class HomeView extends Ewok.View
-    template_src:
-      main: """
-              (div
-                (h2  "Home")
-                (div.posts.cats)
-                (ul)
-                  (each (posts)
-                    (li title)))
-
-            """
+    templates:
+      main: (posts)->
+        div(
+          h2("Home")
+          div( class:'posts cats' )
+          ul(
+            each(posts, (post)->
+              li( post.title )
+            )
+          )
+        )
     render: ->
-      #@$el.html @templates.main.render(posts:@app.posts.toJSON())
-      content= Settee(@template_src.main)(posts:@app.posts.toJSON())
+      content= @templates.main(@app.posts.toJSON())
       @log "Rendered:", content
       @$el.html content
       @app.posts.each (post)=>
         @addView PostView, model:post
 
   class PostView extends Ewok.View
-    template_src:
-      main: """
-              (dl
-                (dt title)
-                (dd body)
-                (hr))
-            """
+    templates:
+      main: (model)->
+        dl(
+          dt(model.title)
+          dd(model.body)
+          hr())
     render: ->
-      tmpl= Settee(@template_src.main)
-      data= @model.toJSON()
-      # content= @templates.main.render(data)
-      content= tmpl(data)
-      @log "Rendered:", content
+      content= @templates.main(@model.toJSON())
+      @log "Rendered:", content, @model.toJSON()
       @$el.html content
       @parent.$el.find('.posts').append @$el
 
   class HelloView extends Ewok.View
     templates:
-      main: """
-              (div
-                (h2 "Helloo " name))
-            """
+      main: (params)->
+        div(
+          h2( "Helloo ", params.name ))
 
   class SearchView extends Ewok.View
     events:
       'submit form': 'doSubmit'
     templates:
-      main: """
-              (+
-                (form
-                  (input type=search id=q (@ value :q)
-                  (button "Go"))
-                (if :q
-                  (div
-                    (h2 "Searching For " :q)
-                  )
-                )
-            """
+      main: (params)-> 
+        _(
+          form(
+            input( type:'search', id:'q', value:(params.q or "") )
+            (button "Go"))
+          (->
+            if params.q
+              div(
+                h2("Searching for: ", params.q))
+          )
+        )
     render: ->
       @params.q= "" unless @params.q
       super()
-      @log @$el.html()
+      @log "html", @$el.html()
 
     doSubmit: (e)->
       e.preventDefault()

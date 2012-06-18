@@ -1,0 +1,99 @@
+$highlight_col: #4a7af5
+
+body
+  font-family: Helvetica
+
+
+.list-container
+  position: absolute
+  top: 50px
+  left: 300px
+  width: 200px
+  height: 350px
+  border: 1px solid silver
+
+.list-container2
+  position: absolute
+  top: 50px
+  left: 550px
+  width: 200px
+  height: 350px
+  border: 1px solid silver
+
+
+
+.list-view
+
+  .list-item
+    padding: 3px
+    border:
+      top: 2px solid transparent
+      bottom: 2px solid transparent
+    margin-bottom: -2px
+
+    &.is-moving
+      opacity: 0.2
+      background: #CCC
+
+    &.is-ghosted
+      cursor: default
+      opacity: 0.2
+      background: #4a7af5
+      color: white
+
+    &.is-droppable
+      //background: #4a7af5
+      //color: white
+
+    &.move-above
+      border-top-color: $highlight_col
+    &.move-under
+      background: $highlight_col
+      border-color: transparent
+      color: white
+    &.move-below
+      border-bottom-color: $highlight_col
+
+
+
+.treeview
+  border: 1px solid silver
+  position: absolute
+  top: 50px
+  left: 50px
+  width: 200px
+  height: 350px
+//
+///   .treeitem
+///     padding: 3px 5px
+///     border:
+///       top: 2px solid transparent
+///       bottom: 2px solid transparent
+///     margin-bottom: -2px
+//
+///     .docitem &
+///       padding-left: 15px
+//    
+///     &.moving
+///       opacity: 0.2
+///       background: #CCC
+//
+///     &.highlight
+///       border-color: transparent
+///       background: transparent
+//
+///       &.top
+///         border-top-color: $highlight_col
+///       &.mid
+///         background: $highlight_col
+///         border-color: transparent
+///         color: white
+///       &.bottom
+///         border-bottom-color: $highlight_col
+//
+///   .ghosted
+///     cursor: default
+///     cursor: ns-resize
+///     opacity: 0.2
+///     background: #4a7af5 !important
+///     color: white
