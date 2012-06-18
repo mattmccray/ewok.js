@@ -17468,7 +17468,7 @@ $.fn.selection.getCharElement = getCharElement;
 }).call(this);
 
 /*
-  Ewok v0.3
+  Ewok v0.4
 */
 
 
@@ -17523,7 +17523,7 @@ $.fn.selection.getCharElement = getCharElement;
   };
 
   this.Ewok = {
-    VERSION: "0.3",
+    VERSION: "0.4",
     exports: function(methods) {
       _.extend(this, methods);
       return this;
@@ -17538,6 +17538,21 @@ $.fn.selection.getCharElement = getCharElement;
         prefix = "";
       }
       _.extend(obj, logger(prefix));
+      return this;
+    },
+    deferLoggable: function(obj, prefix) {
+      if (prefix == null) {
+        prefix = "";
+      }
+      _.extend(obj, {
+        log: function() {
+          var args, logPrefix;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          logPrefix = this.constructor.name ? "[" + this.constructor.name + "]" : prefix;
+          Ewok.loggable(this, logPrefix);
+          return this['log'].apply(this, args);
+        }
+      });
       return this;
     },
     fetchTemplate: (function(has_blam, has_hogan) {
@@ -17621,11 +17636,7 @@ $.fn.selection.getCharElement = getCharElement;
 
     function App() {
       this._willInitialize = __bind(this._willInitialize, this);
-
-      var logPrefix;
       this.el || (this.el = 'body');
-      logPrefix = this.constructor.name ? "[" + this.constructor.name + "]" : '[App]';
-      Ewok.loggable(this, logPrefix);
       this.stateMap = this.constructor.stateMap || {};
       this.routeMap = this.constructor.routeMap || {};
       this._buildRouter();
@@ -17781,7 +17792,7 @@ $.fn.selection.getCharElement = getCharElement;
 
   })();
 
-  Ewok.eventable(App.prototype).exports({
+  Ewok.deferLoggable(App.prototype, '[App]').eventable(App.prototype).exports({
     App: App
   });
 
@@ -17789,8 +17800,7 @@ $.fn.selection.getCharElement = getCharElement;
 (function() {
   var View,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __slice = [].slice;
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = (function(_super) {
 
@@ -17840,7 +17850,10 @@ $.fn.selection.getCharElement = getCharElement;
       for (event in events) {
         if (!__hasProp.call(events, event)) continue;
         callback = events[event];
-        target.on(event, callback);
+        if (!_.isFunction(callback)) {
+          callback = this[callback];
+        }
+        target.on(event, callback, this);
         this._attached.push({
           target: target,
           event: event,
@@ -17856,7 +17869,7 @@ $.fn.selection.getCharElement = getCharElement;
         _ref = this._attached;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           item = _ref[_i];
-          item.target.off(item.event, item.callback);
+          item.target.off(item.event, item.callback, this);
         }
       }
       this._attached = [];
@@ -17878,16 +17891,9 @@ $.fn.selection.getCharElement = getCharElement;
     };
 
     View.prototype.close = function() {
-      var view, _i, _len, _ref;
       this.unbind();
       this.detach();
-      if (this._views) {
-        _ref = this._views;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          view = _ref[_i];
-          view.close();
-        }
-      }
+      this.closeChildViews();
       this.$el.data('view', null);
       this.remove();
       if (this.onClose) {
@@ -17896,12 +17902,16 @@ $.fn.selection.getCharElement = getCharElement;
       return this;
     };
 
-    View.prototype.log = function() {
-      var args, logPrefix;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      logPrefix = this.constructor.name ? "[" + this.constructor.name + "]" : '[View]';
-      Ewok.loggable(this, logPrefix);
-      return this['log'].apply(this, args);
+    View.prototype.closeChildViews = function() {
+      var view, _i, _len, _ref;
+      if (this._views) {
+        _ref = this._views;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          view = _ref[_i];
+          view.close();
+        }
+      }
+      return this;
     };
 
     View.prototype.show = function() {
@@ -17915,8 +17925,9 @@ $.fn.selection.getCharElement = getCharElement;
       var data;
       if (this.templates.main) {
         data = this.model != null ? this.model.toJSON ? this.model.toJSON() : this.model : this.params ? this.params : this.collection ? this.collection.toJSON() : {};
-        return this.$el.html(this.templates.main(data));
+        this.$el.html(this.templates.main(data));
       }
+      return this;
     };
 
     View.prototype.fetchTemplate = function(path) {
@@ -17931,7 +17942,7 @@ $.fn.selection.getCharElement = getCharElement;
 
   })(Backbone.View);
 
-  Ewok.exports({
+  Ewok.deferLoggable(View.prototype).exports({
     View: View
   });
 
@@ -18002,13 +18013,13 @@ $.fn.selection.getCharElement = getCharElement;
 
   })(Backbone.Model);
 
-  Ewok.exports({
+  Ewok.deferLoggable(Model.prototype).exports({
     Model: Model
   });
 
 }).call(this);
 (function() {
-  var Collection,
+  var Collection, LiveCollection,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -18020,12 +18031,169 @@ $.fn.selection.getCharElement = getCharElement;
       return Collection.__super__.constructor.apply(this, arguments);
     }
 
+    Collection.prototype.liveFilter = function(filter, options) {
+      return new LiveCollection(this, filter, options);
+    };
+
     return Collection;
 
   })(Backbone.Collection);
 
-  Ewok.exports({
-    Collection: Collection
+  LiveCollection = (function(_super) {
+
+    __extends(LiveCollection, _super);
+
+    function LiveCollection(_source, _filter, options) {
+      var filter_type, method, _i, _len, _ref;
+      this._source = _source;
+      this._filter = _filter != null ? _filter : {};
+      this.options = options != null ? options : {};
+      if (!this._source) {
+        throw "Requires source collection!";
+      }
+      if (this.options.comparator || this._source.comparator) {
+        this.options.comparator = this.options.comparator || this._source.comparator;
+      }
+      filter_type = _.isFunction(this._filter) ? 'Fn' : 'Obj';
+      _ref = ['_runFilter', '_bindFields', '_unbindFields', '_matchesFilter'];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        method = _ref[_i];
+        this[method] = this[method + filter_type];
+      }
+      LiveCollection.__super__.constructor.call(this, this._runFilter(), this.options);
+      this.start(false);
+    }
+
+    LiveCollection.prototype.update = function() {
+      return this.reset(this._runFilter());
+    };
+
+    LiveCollection.prototype.stop = function() {
+      this._source.off('add', this._didAddModel, this).off('remove', this._didRemoveModel, this).off('reset', this._didResetModels, this);
+      this._unbindFields();
+      return this;
+    };
+
+    LiveCollection.prototype.start = function(auto_update) {
+      if (auto_update == null) {
+        auto_update = true;
+      }
+      this._source.on('add', this._didAddModel, this).on('remove', this._didRemoveModel, this).on('reset', this._didResetModels, this);
+      this._bindFields();
+      if (auto_update) {
+        this.update();
+      }
+      return this;
+    };
+
+    LiveCollection.prototype._didAddModel = function(model, col, options) {
+      if (this._matchesFilter(model)) {
+        return this.add(model, {
+          at: options.index
+        });
+      }
+    };
+
+    LiveCollection.prototype._didRemoveModel = function(model, col) {
+      return this.remove(model);
+    };
+
+    LiveCollection.prototype._didResetModels = function(col) {
+      return this.update();
+    };
+
+    LiveCollection.prototype._fieldDidChange = function(model) {
+      if (this._matchesFilter(model)) {
+        return this.add(model);
+      } else {
+        return this.remove(model);
+      }
+    };
+
+    LiveCollection.prototype._runFilterObj = function() {
+      return this._source.where(this._filter);
+    };
+
+    LiveCollection.prototype._bindFieldsObj = function() {
+      var key, val, _ref;
+      _ref = this._filter;
+      for (key in _ref) {
+        if (!__hasProp.call(_ref, key)) continue;
+        val = _ref[key];
+        this._source.on("change:" + key, this._fieldDidChange, this);
+      }
+      return this;
+    };
+
+    LiveCollection.prototype._unbindFieldsObj = function() {
+      var key, val, _ref;
+      _ref = this._filter;
+      for (key in _ref) {
+        if (!__hasProp.call(_ref, key)) continue;
+        val = _ref[key];
+        this._source.off("change:" + key, this._fieldDidChange, this);
+      }
+      return this;
+    };
+
+    LiveCollection.prototype._matchesFilterObj = function(model) {
+      var key, target, _ref;
+      _ref = this._filter;
+      for (key in _ref) {
+        if (!__hasProp.call(_ref, key)) continue;
+        target = _ref[key];
+        if (target !== model.get(key)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    LiveCollection.prototype._runFilterFn = function() {
+      return this._source.filter(this._filter);
+    };
+
+    LiveCollection.prototype._bindFieldsFn = function() {
+      var field, _i, _len, _ref, _results;
+      if (_.isArray(this.options.fields)) {
+        _ref = this.options.fields;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          field = _ref[_i];
+          _results.push(this._source.on("change:" + field, this._fieldDidChange, this));
+        }
+        return _results;
+      } else {
+        return this._source.on("change", this._fieldDidChange, this);
+      }
+    };
+
+    LiveCollection.prototype._unbindFieldsFn = function() {
+      var field, _i, _len, _ref, _results;
+      if (_.isArray(this.options.fields)) {
+        _ref = this.options.fields;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          field = _ref[_i];
+          _results.push(this._source.off("change:" + field, this._fieldDidChange, this));
+        }
+        return _results;
+      } else {
+        return this._source.off("change", this._fieldDidChange, this);
+      }
+    };
+
+    LiveCollection.prototype._matchesFilterFn = function(model) {
+      return this._filter(model);
+    };
+
+    return LiveCollection;
+
+  })(Backbone.Collection);
+
+  Ewok.deferLoggable(Collection.prototype, '[Collection]').deferLoggable(LiveCollection.prototype, '[LiveCollection]').exports({
+    Collection: Collection,
+    LiveCollection: LiveCollection
   });
 
 }).call(this);

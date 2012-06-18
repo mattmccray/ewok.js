@@ -1,6 +1,6 @@
 class Notes
-  initialize: ->
-    @comments= Comments.liveFilter note_id:@id
+  # initialize: ->
+  #   @comments= Comments.liveFilter note_id:@id
 
   comments: ->
     @_comments or= Comments.liveFilter note_id:@id
