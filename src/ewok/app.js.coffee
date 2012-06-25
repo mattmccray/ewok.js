@@ -1,3 +1,19 @@
+# Monkey patch Backbone to try a 404 route if a route isn't found!
+# fallback_to_404= (fn, args...)->
+#   @lastMatched= no
+#   results= fn.apply(this,args)
+#   Ewok.log "start or checkUrl:", results, @lastMatched, this
+#   @loadUrl('404') unless @lastMatched or results
+#   results
+# Backbone.History::start= _.wrap Backbone.History::start, fallback_to_404
+# Backbone.History::checkUrl= _.wrap Backbone.History::checkUrl, fallback_to_404
+# Backbone.History::loadUrl= _.wrap Backbone.History::loadUrl, (lu, args...)->
+#   result= lu.apply(this, args)
+#   Ewok.log "loadUrl", args, result, @lastMatched, this
+#   @lastMatched= yes if result
+#   result
+
+
 
 class App
 
@@ -28,8 +44,6 @@ class App
       @instance.log "Already running!"
       @instance
 
-  #el: 'body'
-
   constructor: ->
     @el or= 'body'
     # logPrefix= if @.constructor.name then "[#{@.constructor.name}]" else '[App]'
@@ -41,11 +55,21 @@ class App
   _buildRouter: ->
     # @log "_buildRouter()!", @routeMap, @
     @router= new Backbone.Router()
+    r404= null
     for own path,info of @routeMap
-      rInfo= new RouteInfo(@, path, info)
-      # @log "Route -> ##{path}", rInfo
-      @router.route path, null, @_routeChange(rInfo)
-      @routeMap[path]= rInfo # ???
+      if path is '404'
+        @log "Route -> ##{path}", info
+        r404= new RouteInfo(@, '.*', info)
+        @routeMap[path]= r404 # ???
+      else
+        @log "Route -> ##{path}", info
+        rInfo= new RouteInfo(@, path, info)
+        @router.route path, null, @_routeChange(rInfo)
+        @routeMap[path]= rInfo # ???
+    
+    unless r404 is null
+      @log "Route -> *", info
+      @router.route '.*', null, @_routeChange(r404)
     @
 
   _willInitialize: =>
@@ -64,7 +88,6 @@ class App
       @_currentRoute.doLeave(args) if @_currentRoute
       @_currentRoute= info
       @_currentRoute.doEnter(args)
-
 
   # Visit a route, triggering the router to do it's thing
   visit: (path, silent=no)->
@@ -101,7 +124,6 @@ class App
     else
       @_willInitialize()
     @
-
 
 
 namedParamRE= /:\w+/g

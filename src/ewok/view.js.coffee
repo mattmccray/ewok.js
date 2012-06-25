@@ -37,7 +37,7 @@ class View extends Backbone.View
     view= new view(atts) if _.isFunction(view)
     view.parent= @
     @_views.push view
-    view.render(@) # ???
+    view.render() unless atts.auto_render is false
     view
 
   close: ->
@@ -54,20 +54,14 @@ class View extends Backbone.View
     view.close() for view in @_views if @_views
     @
 
-
-  # Doesn't call the Ewok.loggable code until it's first used.
-  # log: (args...)->
-  #   logPrefix= if @.constructor.name then "[#{@.constructor.name}]" else '[View]'
-  #   Ewok.loggable( @, logPrefix)
-  #   @['log'].apply(@, args)
-  #   @
+  # onClose: -> @log "CLOSED!"
   
   show: ->
     @onShow() if @onShow
     # @log "SHOWN"
     @
 
-  render: ->
+  render: (extra...)->
     if @templates.main
       data= if @model?
         if @model.toJSON
@@ -80,7 +74,7 @@ class View extends Backbone.View
         @collection.toJSON()
       else
         {}
-      @$el.html @templates.main(data)
+      @$el.html @templates.main(data, extra...)
     @
 
   fetchTemplate: (path)->
@@ -97,7 +91,7 @@ Ewok
   .deferLoggable( View:: )
   .exports { View }
 
-
+# jQuery plugin that walks up the parentNode change to fetch the ewok view for the DOM element.
 $.fn.view= ->
   view= null
   parent= $(this)

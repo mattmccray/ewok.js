@@ -57,6 +57,8 @@ class LiveCollection extends Backbone.Collection
 
   _fieldDidChange: (model)->
     if @_matchesFilter model
+      # index= @_source.indexOf(model) # This won't really work right, will it?
+      # @add model, at:index
       @add model
     else
       @remove model

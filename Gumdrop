@@ -20,17 +20,16 @@ skip 'dist/*'
 
 #  Ignore files from compilation, but does load the content into memory (for serving)
 ignore 'index.html'
+ignore 'examples/**/*'
 
 generate do
 
-  sprockets 'ewok.js', :src=>'ewok.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>:packr
+  sprockets 'ewok.js', :src=>'ewok/index.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>:packr, :keep_src=>true
+  sprockets 'ewok-libs.js', :src=>'ewok-libs.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>false
 
-  sprockets 'ewok-debug.js', :src=>'ewok-debug.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>false
-
-  sprockets 'ewok-only.js', :src=>'ewok-only.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>:packr
-  
   # For running test in serve mode
-  sprockets 'dist/ewok-debug.js', :src=>'ewok-debug.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>false
+  sprockets 'dist/ewok.js', :src=>'ewok/index.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>false
+  sprockets 'dist/ewok-libs.js', :src=>'ewok-libs.js', :paths=>['./lib'], :prune=>false, :root=>'./src', :compress=>false
    
 end
 
